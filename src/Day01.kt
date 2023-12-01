@@ -6,6 +6,7 @@ fun main() {
         var lo: Char? = null
         var hi: Char? = null
 
+
         //Go through all characters, one pass
         for (ch in input) {
             if (ch.isDigit()) {
@@ -18,6 +19,8 @@ fun main() {
                 hi = ch
             }
         }
+
+        
         //combine numbers to int
         return "$lo$hi".toInt()
     }

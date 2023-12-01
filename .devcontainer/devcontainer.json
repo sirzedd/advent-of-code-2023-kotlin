@@ -1,0 +1,20 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/ubuntu
+{
+  "name": "AdventOfCode",
+  "image": "mcr.microsoft.com/devcontainers/base:ubuntu-22.04",
+  "runArgs": ["--name", "aoc_kotlin_devcontainer"],
+  "remoteUser": "vscode",
+  "shutdownAction": "stopContainer",
+  "features": {
+    "ghcr.io/devcontainers-contrib/features/kotlin-sdkman:2": {},
+    "ghcr.io/devcontainers-contrib/features/gradle-sdkman:2": {},
+    "ghcr.io/devcontainers-contrib/features/go-task:1": {}
+  },
+  "extensions": [
+    "vscjava.vscode-java-pack",
+    "redhat.vscode-xml",
+    "fwcd.kotlin",
+    "vscjava.vscode-gradle"
+  ]
+}
