@@ -4,3 +4,4 @@ build
 src/**/*.txt
 bin
 .vscode
+.DS_Store
