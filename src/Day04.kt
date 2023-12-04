@@ -11,21 +11,18 @@ fun main() {
     )
 
     fun parseCard(input: String): Card {
-        val cardNumbers = input.split(":")
-        val cardId = cardNumbers[0].trim()
+        val (cardNumbers, winningNumbersText, winningMineText) = input.split(":", "|")
+        val cardId = cardNumbers.trim()
             .split(" ")
             .filter{it.isNotEmpty()}[1]
             .trim()
             .toInt()
 
-        val winningMine = cardNumbers[1]
-            .trim()
-            .split("|")
-        val winningNumbers = winningMine[0]
+        val winningNumbers = winningNumbersText
             .split(" ")
             .filter{it.isNotEmpty()}
             .map { it.trim().toInt() }
-        val myNumbers = winningMine[1].trim().split(" ")
+        val myNumbers = winningMineText.split(" ")
                 .filter{ !it.isEmpty()}
                 .map { it.trim().toInt() }
         return Card(
