@@ -16,9 +16,8 @@ fun main() {
         var humidityToLocation: List<SourceAndDestination> = mutableListOf(),
     )
 
-    //map and end index
-    fun grabMapUntilReturn(inputs: List<String>, start: Int): Pair<List<SourceAndDestination>, Int> {
-
+    //Build List of Source Destinations
+    fun buildSourceDestinationsUntilBlank(inputs: List<String>, start: Int): Pair<List<SourceAndDestination>, Int> {
         var ranges: List<SourceAndDestination> = mutableListOf()
         for (i in start .. inputs.size-1) {
             val line = inputs[i]
@@ -40,6 +39,7 @@ fun main() {
         return ranges to inputs.size
     }
 
+    //Parse the almanac
     fun parseAlmanac(inputs: List<String>): Almanac {
         var almanac = Almanac()
         almanac.seeds = inputs.get(0).split(":")[1].split(" ").filter { it.isNotEmpty() }.map { it.toLong() }
@@ -49,37 +49,37 @@ fun main() {
             var line = inputs[i]
             when {
                 line.contains("seed-to-soil map:") -> {
-                    val (map, newIndex) = grabMapUntilReturn(inputs, i + 1)
+                    val (map, newIndex) = buildSourceDestinationsUntilBlank(inputs, i + 1)
                     almanac.seedToSoil += map
                     i = newIndex
                 }
                 line.contains("soil-to-fertilizer map:") -> {
-                    val (map, newIndex) = grabMapUntilReturn(inputs, i + 1)
+                    val (map, newIndex) = buildSourceDestinationsUntilBlank(inputs, i + 1)
                     almanac.soilToFertilizer += map
                     i = newIndex
                 }
                 line.contains("fertilizer-to-water map:") -> {
-                    val (map, newIndex) = grabMapUntilReturn(inputs, i + 1)
+                    val (map, newIndex) = buildSourceDestinationsUntilBlank(inputs, i + 1)
                     almanac.fertilizerToWater += map
                     i = newIndex
                 }
                 line.contains("water-to-light map:") -> {
-                    val (map, newIndex) = grabMapUntilReturn(inputs, i + 1)
+                    val (map, newIndex) = buildSourceDestinationsUntilBlank(inputs, i + 1)
                     almanac.waterToLight += map
                     i = newIndex
                 }
                 line.contains("light-to-temperature map:") -> {
-                    val (map, newIndex) = grabMapUntilReturn(inputs, i + 1)
+                    val (map, newIndex) = buildSourceDestinationsUntilBlank(inputs, i + 1)
                     almanac.lightToTemperature += map
                     i = newIndex
                 }
                 line.contains("temperature-to-humidity map:") -> {
-                    val (map, newIndex) = grabMapUntilReturn(inputs, i + 1)
+                    val (map, newIndex) = buildSourceDestinationsUntilBlank(inputs, i + 1)
                     almanac.temperatureToHumidity += map
                     i = newIndex
                 }
                 line.contains("humidity-to-location map:") -> {
-                    val (map, newIndex) = grabMapUntilReturn(inputs, i + 1)
+                    val (map, newIndex) = buildSourceDestinationsUntilBlank(inputs, i + 1)
                     almanac.humidityToLocation += map
                     i = newIndex
                 }
@@ -94,17 +94,16 @@ fun main() {
     }
 
     fun findNextValueInRanges(value: Long, sourceAndDestinations: List<SourceAndDestination>): Long {
-        val sourceAndDestination = sourceAndDestinations.find { it.source.contains(value) }
-
-        //58 ... 100
-        //59
-        if (sourceAndDestination != null) {
-            val offset = value - sourceAndDestination.source.first
-            val nextValue = sourceAndDestination.destination.first + offset
-            return nextValue
-        }
-
-        return value;
+        //find the range that value is in
+        val newValue = sourceAndDestinations.find { it.source.contains(value) }
+            ?.let {
+                //find offset from source
+                val offset = value - it.source.first
+                //find destination based on offset so we don't store them all
+                val nextValue = it.destination.first + offset
+                return nextValue
+            } ?: value
+        return newValue
     }
 
     fun findLowestLocationBySeed(seed: Long, almanac: Almanac): Long {
@@ -118,18 +117,20 @@ fun main() {
         return location
     }
 
-    fun findLowestValue(almanac: Almanac): Long{
-        val seeds = almanac.seeds
-        return seeds.minOf { findLowestLocationBySeed(it, almanac) }
-    }
-
     fun part1(inputs: List<String>): Long {
         val almanac = parseAlmanac(inputs)
-        return findLowestValue(almanac)
+        return almanac.seeds.minOf{ findLowestLocationBySeed(it, almanac) }
+    }
+
+    fun findLowestValuePart2(almanac: Almanac): Long{
+        val seedRange = almanac.seeds.chunked(2).map { it[0] .. it[0] + it[1] }
+        //get the minimum of the ranges, step through each range and take the min
+        return seedRange.minOf { it.step(1).minOf { findLowestLocationBySeed(it, almanac) }}
     }
 
     fun part2(inputs: List<String>): Long {
-        return 0
+        val almanac = parseAlmanac(inputs)
+        return findLowestValuePart2(almanac)
     }
 
     val testInput = readInput("Day05_test")
@@ -138,9 +139,9 @@ fun main() {
 
     val input = readInput("Day05")
     part1(input).println()
-//
-//    val testInput2 = readInput("Day05_test2")
-//    val part2Answer = part2(testInput2)
-//    check(part2Answer == 30)
-//    part2(input).prLongln()
+
+    val testInput2 = readInput("Day05_test")
+    val part2Answer = part2(testInput2)
+    check(part2Answer == 46L)
+    part2(input).println()
 }
