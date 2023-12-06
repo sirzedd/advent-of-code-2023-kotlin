@@ -1,3 +1,12 @@
+import io.reactivex.rxjava3.core.Flowable
+import io.reactivex.rxjava3.core.Maybe
+import io.reactivex.rxjava3.core.MaybeEmitter
+import io.reactivex.rxjava3.core.MaybeObserver
+import io.reactivex.rxjava3.core.Observable
+import io.reactivex.rxjava3.core.Single
+import io.reactivex.rxjava3.schedulers.Schedulers
+import java.util.concurrent.Executors
+import java.util.concurrent.Flow
 //My initial attempt
 fun main() {
 
@@ -30,8 +39,8 @@ fun main() {
             val range = values[2]
 
             val sourceAndDestination = SourceAndDestination(
-                source = source .. source + range,
-                destination = destination .. destination + range,
+                source = source .. source + range - 1,
+                destination = destination .. destination + range - 1,
             )
             ranges += sourceAndDestination
 
@@ -121,11 +130,20 @@ fun main() {
         val almanac = parseAlmanac(inputs)
         return almanac.seeds.minOf{ findLowestLocationBySeed(it, almanac) }
     }
+    fun getMin(v1: Long, v2: Long): Long = if (v1 < v2) v1 else v2
+
+    fun findLowestValueMaybe(seedRange: LongRange, almanac: Almanac): Single<Long> {
+        return Flowable.rangeLong(seedRange.first, seedRange.last - seedRange.first)
+                .reduce(Long.MAX_VALUE) {  min, next ->  getMin(min, findLowestLocationBySeed(next, almanac)) }
+                .observeOn(Schedulers.from(Executors.newWorkStealingPool(10)))
+                .subscribeOn(Schedulers.single())
+    }
 
     fun findLowestValuePart2(almanac: Almanac): Long{
         val seedRange = almanac.seeds.chunked(2).map { it[0] .. it[0] + it[1] }
         //get the minimum of the ranges, step through each range and take the min
-        return seedRange.minOf { it.step(1).minOf { findLowestLocationBySeed(it, almanac) }}
+        return seedRange.minOf { findLowestValueMaybe(it, almanac).blockingGet()
+        }
     }
 
     fun part2(inputs: List<String>): Long {
@@ -143,5 +161,12 @@ fun main() {
     val testInput2 = readInput("Day05_test")
     val part2Answer = part2(testInput2)
     check(part2Answer == 46L)
+    val start = System.currentTimeMillis()
     part2(input).println()
+    println("${System.currentTimeMillis() - start} ms")
+    //218931
+    //287431 threads
+    //448468 set threads
+    //774556  trampoline
+    //235135 work stealing 10
 }
