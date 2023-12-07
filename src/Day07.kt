@@ -39,12 +39,12 @@ fun main() {
         val pairMap = findPairs(cards)
         val matches = pairMap.values
         return when {
-            matches.contains(5) -> HandType.FIVE
-            matches.contains(4) -> HandType.FOUR
-            matches.contains(3) && matches.contains(2) -> HandType.FULL
-            matches.contains(3) -> HandType.THREE
-            matches.filter { it == 2 }.size == 2 -> HandType.TWO
-            matches.contains(2) -> HandType.ONE
+            5 in matches -> HandType.FIVE
+            4 in matches -> HandType.FOUR
+            3 in matches && 2 in matches -> HandType.FULL
+            3 in matches -> HandType.THREE
+            2 in matches && 2 in (matches - 2) -> HandType.TWO
+            2 in matches -> HandType.ONE
             else -> HandType.HIGH
         }
     }
