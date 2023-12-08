@@ -1,3 +1,5 @@
+import kotlin.math.min
+
 fun main() {
 
     data class MapDirections(
@@ -39,31 +41,7 @@ fun main() {
                 'L' -> node!!.first
                 else -> node!!.second
             }
-            if (next == end) {
-                return count
-            }
-        }
-    }
-
-    fun findStepsToEnd(directionMap: MapDirections, starting: List<String>): Long {
-        val directions = directionMap.direction
-        val map = directionMap.map
-        var nextList: MutableList<String> = starting.toMutableList()
-        var count = 0L
-        while(true) {
-            val direction = directions.removeLast()
-            directions.addFirst(direction)
-            count ++
-            var nextNodes: MutableList<String> = mutableListOf()
-            for (next in nextList) {
-                val node = map.get(next)
-                nextNodes += when (direction) {
-                    'L' -> node!!.first
-                    else -> node!!.second
-                }
-            }
-            nextList = nextNodes
-            if (nextList.filter { it.last() == 'Z'}.size == nextList.size) {
+            if (next.endsWith(end)) {
                 return count
             }
         }
@@ -75,12 +53,33 @@ fun main() {
         return count
     }
 
-    fun part2(inputs: List<String>): Long {
-        val directions = parseMap(inputs)
-        val startingNodes = directions.map.keys.filter { it.last() == 'A' }
-        val count = findStepsToEnd(directions, startingNodes)
+    fun greatestCommonDivisor(a: Long, b: Long): Long {
+        var result = min(a, b)
+        while (result > 0) {
+            if( a % result == 0L && b % result == 0L) {
+                return result
+            }
+            result --
+        }
+        return result
+    }
+    fun leastCommonMultiple(a: Long, b: Long): Long {
+        return (a / greatestCommonDivisor(a, b)) * b
+    }
 
-        return count
+    fun part2(inputs: List<String>): Long {
+        //I found that using leastCommonMultiple was the best way to solve
+        //I'm assuming now that there would have to be a loop, or potentially
+        //you'd end up with a new loop and would have a different count after Z
+        //especially with different directions. You'd have short and long ones happening at the same time.
+        //Had to google how to build leastCommonMultiple
+        val directions = parseMap(inputs)
+        val total = directions.map.keys.filter { it.last() == 'A' }
+            .map { startingPoint ->
+                findStepsToEnd(directions, startingPoint, "Z")
+            }.reduce{ acc, l -> leastCommonMultiple(acc, l) }
+
+        return total
     }
 
     val testInput = readInput("Day08_test")
@@ -121,10 +120,6 @@ fun main() {
     } else {
         println("Successful")
     }
-    val testInput2Part2 = readInput("Day08_test2-2")
-    val solution = part2(testInput2Part2)
-    println("Solution $solution")
-
 
     println("--- Part 2 ---")
     part2(input).println()
