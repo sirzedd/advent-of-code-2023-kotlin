@@ -62,15 +62,3 @@ fun main() {
 }
 
 
-fun test(partName: String, testFile: String, answer: Long, part: (inputs: List<String>)-> Long) {
-    val testInput = readInput(testFile)
-    println("--- $partName ---")
-    val partAnswer = part(testInput)
-
-    if (partAnswer != answer) {
-        error("$partName failed = $partAnswer != $answer")
-        return
-    } else {
-        println("Successful")
-    }
-    println("--- $partName end---")}

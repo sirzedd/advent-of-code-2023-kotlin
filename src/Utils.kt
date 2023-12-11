@@ -20,3 +20,17 @@ fun String.md5() = BigInteger(1, MessageDigest.getInstance("MD5").digest(toByteA
  * The cleaner shorthand for printing output.
  */
 fun Any?.println() = println(this)
+
+fun test(partName: String, testFile: String, answer: Long, part: (inputs: List<String>)-> Long) {
+    val testInput = readInput(testFile)
+    println("--- $partName ---")
+    val partAnswer = part(testInput)
+
+    if (partAnswer != answer) {
+        error("$partName failed = $partAnswer != $answer")
+        return
+    } else {
+        println("Successful")
+    }
+    println("--- $partName end---")
+}
